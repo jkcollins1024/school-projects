@@ -1,0 +1,46 @@
+Encode/Decode Problems
+
+1)
+.pos 0x0
+ 	irmovl Stack,%esp # Initialize stack pointer
+ 	call Proc 	# procedure call
+ 	irmovl $10,%edx # return point
+ halt
+.pos 0x20
+Proc: 			# Proc:
+ 	ret 		# return immediately
+ 	rrmovl %edx,%ebx # not executed
+.pos 0x30
+	Stack: 		# Stack: Stack pointer
+
+Answer:
+
+30f430000000
+8020000000
+30f20a000000
+00
+
+90
+2023
+
+2)
+
+a. 30f003000000
+
+Answer: irmovl $3, %eax
+
+b. 6304
+
+Answer: xorl %eax, %esp
+
+c. 6020
+
+Answer: addl %edx, %eax
+
+d. 740e000000
+
+Answer: jne Address (where address is at memory location 0x0000000e, or memory location 14)
+
+e. a02f
+
+Answer: pushl %edx

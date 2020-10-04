@@ -1,0 +1,122 @@
+#Jonathan Collins
+#Assembly Program Rpow
+#Uses the four Y86 functions and stack manipulation to
+#recursively find powers of whatever numbers are put in
+
+
+#Initializes registers, and puts the first 0xffff delimiter into the Array
+.pos 0x0
+Main:	irmovl Stack, %esp
+	irmovl Stack, %ebp
+	irmovl $1, %ebx
+	irmovl $1, %ecx
+	irmovl $2, %edx
+	irmovl $4, %edi
+	irmovl Array, %esi
+	irmovl $0xffffffff, %eax
+	rmmovl %eax, (%esi)
+
+Loop:			#this line is the location for both jumps
+	irmovl $4, %edi
+	addl %edi, %esi	#increment the Array pointer to next memory segment
+
+	pushl %esi
+	pushl %ebx
+	pushl %edx
+	call Rpow
+	popl %edx
+	popl %ebx
+	popl %esi
+
+	rmmovl %eax, (%esi)
+	irmovl $1, %ecx
+	addl %ecx, %ebx	#increment %ebx and see if it loops again
+	irmovl $8, %eax
+	subl %ebx, %eax
+	jge Loop
+
+	irmovl $4, %edi
+	addl %edi, %esi		#increment Array pointer and mark off section again
+	irmovl $0xffffffff, %eax
+	rmmovl %eax, (%esi)
+	addl %ecx, %edx		#increment %edx and see if it loops again
+	irmovl $5, %eax
+	subl %edx, %eax
+	irmovl $1, %ebx
+	jge Loop
+
+	halt
+
+
+
+Rpow: 	pushl %ebp		#push the base pointer, to be popped at the end of call
+	rrmovl %esp, %ebp	#initializing registers inside the function
+	mrmovl 8(%ebp), %ebx
+	mrmovl 12(%ebp), %edx
+
+	irmovl $1, %ecx
+	xorl %edx, %ecx
+	jne Else2		#if %edx(power) is 1, no need to keep recurring
+
+	rrmovl %ebx, %eax
+	rrmovl %ebp, %esp
+	popl %ebp
+	ret
+
+Else2:	irmovl $1, %ecx
+	subl %ecx, %edx	#subtract one from power and call Rpow again
+
+	pushl %edx
+	pushl %ebx
+	call Rpow
+	popl %ebx
+	popl %edx
+
+	rrmovl %eax, %esi
+
+	pushl %ebx
+	pushl %esi
+	call Rmult
+	popl %esi
+	popl %ebx
+
+	rrmovl %ebp, %esp
+	popl %ebp
+	ret
+
+Rmult:	
+	pushl %ebp
+	rrmovl %esp, %ebp
+	mrmovl 8(%ebp), %ebx
+	mrmovl 12(%ebp), %edx
+
+	irmovl $1, %ecx
+	xorl %edx, %ecx
+	jne Else1		#if %edx is 1, we don't need to keep recurring
+
+	rrmovl %ebx, %eax
+	rrmovl %ebp, %esp
+	popl %ebp
+	ret
+
+Else1:	irmovl $1, %ecx
+	subl %ecx, %edx
+
+	pushl %edx
+	pushl %ebx
+	call Rmult
+	popl %ebx
+	popl %edx
+
+	addl %ebx, %eax
+	rrmovl %ebp, %esp
+	popl %ebp
+	ret
+	
+
+.pos 0x0200
+Array:
+
+.pos 0x1000
+Stack:
+

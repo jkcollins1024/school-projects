@@ -1,0 +1,62 @@
+#Jonathan Collins
+#CS304 Organization Homework 6
+#Y86 program using addition, subtraction, and bitwise functions to produce the square of any number
+
+.pos 0x0
+		#hardcoded value of 19 put into register, where it stays
+		#initialize array[0] to a register and put 19 into array[0]
+		irmovl $19, %eax
+		irmovl array, %esp
+		rmmovl %eax, (%esp)
+		
+		#setting up for squareAdd, putting constants into registers and moving the
+		#initial value (0) from array[1] to a register
+SquareAdd: 	irmovl $1, %ebx
+            	irmovl $1, %esi
+		mrmovl 4(%esp), %edx
+
+		#Loop which adds the number to be squared to the register which tracks the square
+		#uses %ebx as a counter to count the number of adds
+Loop1: 		addl %eax, %edx
+		addl %esi, %ebx
+
+		#%ecx takes the value of the counter, checks to see if it is past 19
+		rrmovl %ebx, %ecx
+		subl %eax, %ecx 
+		jle Loop1
+
+		#moving final value of the square back from register into array[1]
+		rmmovl %edx, 4(%esp)
+
+		#initializing registers to perform the squarebit operations
+SquareBit:  	rrmovl %eax, %ecx
+            	mrmovl 8(%esp), %edx
+            	irmovl $1, %ebx
+
+		#in the squarebit loop, %esi takes the bit value and checks it with the number
+		#%ecx is the multiple, and it is added to the running total in %edx only if
+		#the bit value is correct
+Loop2:      	rrmovl %ebx, %esi
+            	andl %eax, %esi
+            	subl %ebx, %esi
+
+		#skips adding the multiple if the AND is not equal to the original bit values
+            	jne IfNot
+            	addl %ecx, %edx
+IfNot:      	addl %ebx, %ebx
+            	addl %ecx, %ecx
+            	rrmovl %ebx, %esi
+            	subl %eax, %esi
+            	jl Loop2
+
+		#updates array[2] to reflect the value of the square
+		rmmovl %edx, 8(%esp)
+            
+		halt
+
+
+		#declares the array in which we will be storing the results
+		.align 4
+array:	    	.long 0x0
+		.long 0x0
+		.long 0x0
